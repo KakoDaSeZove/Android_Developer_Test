@@ -1,9 +1,13 @@
 package com.rtrk.android.test.ui;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.SurfaceHolder;
@@ -23,6 +27,9 @@ import java.io.IOException;
 public class PlaybackActivity extends Activity implements SurfaceHolder.Callback, MediaPlayer.OnPreparedListener {
 
     public static final String LOG_TAG = "PlaybackActivity";
+    // in ms
+    public static final int kINFO_BANNER_ACTIVE_TIME = 10 * 1000;
+
 
     private SurfaceView mSurfaceView;
     private MediaPlayer mMediaPlayer;
@@ -39,13 +46,12 @@ public class PlaybackActivity extends Activity implements SurfaceHolder.Callback
     private ImageView mChannelIcon;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         //Get backend reference
-        backend = BackendEmulator.getInstance();
+        backend = BackendEmulator.getInstance(getApplicationContext());
         setContentView(R.layout.activity_playback);
 
         mSurfaceView = (SurfaceView) findViewById(R.id.surface_view);
@@ -178,6 +184,30 @@ public class PlaybackActivity extends Activity implements SurfaceHolder.Callback
                 Picasso.get().load(backend.getActiveChannel().getLogo()).into(mChannelIcon);
 
                 mChannelTitle.setVisibility(View.VISIBLE);
+
+                AsyncTask task = new AsyncTask() {
+                    @Override
+                    protected Object doInBackground(Object[] objects) {
+
+                        try {
+                            Thread.sleep(kINFO_BANNER_ACTIVE_TIME);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        PlaybackActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mChannelTitle.setVisibility(View.GONE);
+                            }
+                        });
+
+                        return null;
+                    }
+                };
+
+                task.execute();
+
 
                 return true;
 

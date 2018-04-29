@@ -20,20 +20,9 @@ public class SplashScreenActivity extends Activity {
     // in ms
     public static final int kSPLASH_SCREEN_BOOT_TIME = 3 * 1000;
 
-    /**
-     * Backend instance
-     */
-    private BackendEmulator backend;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
-        //Get backend reference
-        backend = BackendEmulator.getInstance();
-
-        //TODO DO STUFF
 
         //Try to implement splash screen
         setContentView(R.layout.splashscreen);
@@ -57,18 +46,5 @@ public class SplashScreenActivity extends Activity {
         };
 
         task.execute();
-
-
-        //Try to play some video
-        //Try to play actual channel
-        //Try to implement info banner for current channel
-        //Try to implement next/previous channel
-        //Try to implement channel list
-        //Try to implement time out on info banner
-        //Try to implement favorite list
-        //Try to change application icon
-        //Try to remember last watched channel
-        //Try to remember favorite list
-
     }
 }

@@ -14,7 +14,7 @@
         android:layout_width="750dp"
         android:layout_height="100dp"
         android:orientation="horizontal"
-        android:visibility="visible"
+        android:visibility="gone"
         android:layout_marginTop="30dp"
         android:background="#707070"
         android:layout_centerHorizontal="true"

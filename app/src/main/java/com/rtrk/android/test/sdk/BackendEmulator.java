@@ -1,8 +1,15 @@
 package com.rtrk.android.test.sdk;
 
+import android.content.Context;
+
+import com.j256.ormlite.dao.Dao;
+import com.rtrk.android.test.db.Channel;
+import com.rtrk.android.test.db.DatabaseHelper;
 import com.rtrk.android.test.sdk.models.ChannelEntity;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Backend emulator
@@ -14,21 +21,28 @@ public class BackendEmulator {
     /**
      * Singleton instance
      */
-    private final static BackendEmulator instance = new BackendEmulator();
+    private static BackendEmulator instance;
 
     /**
      * Singleton constructor
      */
-    private BackendEmulator() {
+    private BackendEmulator(Context context) {
+        mContext = context;
+
         setup();
     }
+
+    private Context mContext;
 
     /**
      * Get singleton instance
      *
      * @return singleton instance
      */
-    public static BackendEmulator getInstance() {
+    public static BackendEmulator getInstance(Context context) {
+        if(instance == null){
+            instance = new BackendEmulator(context);
+        }
         return instance;
     }
 
@@ -36,11 +50,6 @@ public class BackendEmulator {
      * Channels
      */
     private ArrayList<ChannelEntity> channels = new ArrayList<>();
-
-    /**
-     * Active channel
-     */
-    private ChannelEntity activeChannel;
 
     /**
      * Channel logos
@@ -112,10 +121,31 @@ public class BackendEmulator {
             channels.add(new ChannelEntity(id, name, logo, url));
 
         }
+        DatabaseHelper helper = new DatabaseHelper(mContext);
+        Dao<Channel, Integer> channelDao = null;
+        try {
+            channelDao = helper.getmChannelDao();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-        //Initialize first channel by default
-        if (channels.size() > 0) {
-            activeChannel = channels.get(0);
+        //checking if there is something in db
+
+        List<Channel> channelsDB = null;
+        try {
+            channelsDB = channelDao.queryForAll();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (channelsDB == null || channelsDB.size() == 0) {
+            Channel lastWatchedChannel = new Channel();
+            lastWatchedChannel.setmLastWatchedChannel(0);
+            try {
+                channelDao.create(lastWatchedChannel);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -153,7 +183,23 @@ public class BackendEmulator {
      * @param index channel index
      */
     public void changeChannel(int index) {
-        activeChannel = channels.get(index);
+        DatabaseHelper helper = new DatabaseHelper(mContext);
+        Dao<Channel, Integer> channelDao = null;
+        try {
+            channelDao = helper.getmChannelDao();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            List<Channel> channelDb = channelDao.queryForAll();
+            Channel lastWatchedChannel = channelDb.get(0);
+            lastWatchedChannel.setmLastWatchedChannel(index);
+
+            channelDao.update(lastWatchedChannel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -162,8 +208,25 @@ public class BackendEmulator {
      * @param channel channel
      */
     public void changeChannel(ChannelEntity channel) {
-        this.activeChannel = channel;
+        DatabaseHelper helper = new DatabaseHelper(mContext);
+        Dao<Channel, Integer> channelDao = null;
+        try {
+            channelDao = helper.getmChannelDao();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            List<Channel> channelDb = channelDao.queryForAll();
+            Channel lastWatchedChannel = channelDb.get(0);
+            lastWatchedChannel.setmLastWatchedChannel(channel.getId());
+
+            channelDao.update(lastWatchedChannel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
+
 
     /**
      * Get active channel index
@@ -171,13 +234,23 @@ public class BackendEmulator {
      * @return active channel index
      */
     public int getActiveChannelIndex() {
-        for (ChannelEntity channelEntity : channels) {
-            if (channelEntity.getId() == activeChannel.getId()) {
-                return activeChannel.getId();
-            }
+        DatabaseHelper helper = new DatabaseHelper(mContext);
+        Dao<Channel, Integer> channelDao = null;
+        try {
+            channelDao = helper.getmChannelDao();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
-        return -1;
+
+        List<Channel> channels = null;
+        try {
+            channels = channelDao.queryForAll();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return channels.get(0).getmLastWatchedChannel();
     }
 
     /**
@@ -186,6 +259,24 @@ public class BackendEmulator {
      * @return active channel
      */
     public ChannelEntity getActiveChannel() {
-        return activeChannel;
+        DatabaseHelper helper = new DatabaseHelper(mContext);
+        Dao<Channel, Integer> channelDao = null;
+        try {
+            channelDao = helper.getmChannelDao();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        List<Channel> channelsDB = null;
+        try {
+            channelsDB = channelDao.queryForAll();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        int lastWatchdChannel = channelsDB.get(0).getmLastWatchedChannel();
+
+        return channels.get(lastWatchdChannel);
     }
 }
