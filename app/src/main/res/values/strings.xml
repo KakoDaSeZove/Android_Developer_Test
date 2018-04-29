@@ -1,5 +1,7 @@
 <resources>
-    <string name="app_name">AndroidDeveloperTest</string>
+    <string name="app_name">RT-RK Live</string>
 
     <string name="rtrk_live">RT-RK\nLive</string>
+
+    <string name="channel_list">Channel list</string>
 </resources>
