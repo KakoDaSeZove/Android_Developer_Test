@@ -8,10 +8,15 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.rtrk.android.test.R;
 import com.rtrk.android.test.sdk.BackendEmulator;
 import com.rtrk.android.test.sdk.models.ChannelEntity;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 
@@ -28,6 +33,13 @@ public class PlaybackActivity extends Activity implements SurfaceHolder.Callback
      */
     private BackendEmulator backend;
 
+    private LinearLayout mChannelTitle;
+    private TextView mChannelName;
+    private TextView mChannelNumber;
+    private ImageView mChannelIcon;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +52,10 @@ public class PlaybackActivity extends Activity implements SurfaceHolder.Callback
         mSurfaceHolder = mSurfaceView.getHolder();
         mSurfaceHolder.addCallback(this);
 
+        mChannelName = findViewById(R.id.channel_name);
+        mChannelNumber = findViewById(R.id.channel_number);
+        mChannelTitle = findViewById(R.id.channel_title);
+        mChannelIcon = findViewById(R.id.channel_icon);
     }
 
     @Override
@@ -119,6 +135,8 @@ public class PlaybackActivity extends Activity implements SurfaceHolder.Callback
                     e.printStackTrace();
                 }
 
+                mChannelTitle.setVisibility(View.GONE);
+
                 return true;
             case KeyEvent.KEYCODE_CHANNEL_DOWN:
             case KeyEvent.KEYCODE_DPAD_DOWN:
@@ -145,6 +163,27 @@ public class PlaybackActivity extends Activity implements SurfaceHolder.Callback
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
+
+                mChannelTitle.setVisibility(View.GONE);
+
+                return true;
+
+            case KeyEvent.KEYCODE_ENTER:
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+            case KeyEvent.KEYCODE_BUTTON_A:
+
+                mChannelName.setText(backend.getActiveChannel().getName());
+                mChannelNumber.setText(backend.getActiveChannelIndex() + "");
+                Picasso.get().load(backend.getActiveChannel().getLogo()).into(mChannelIcon);
+
+                mChannelTitle.setVisibility(View.VISIBLE);
+
+                return true;
+
+            case KeyEvent.KEYCODE_BACK:
+            case KeyEvent.KEYCODE_BUTTON_B:
+                mChannelTitle.setVisibility(View.GONE);
 
                 return true;
             default:
